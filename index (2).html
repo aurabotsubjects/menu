@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurabot — Learning Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bush-deep:#0f2a21;
+    --bush:#1a4636;
+    --bush-light:#2e6b52;
+    --kowhai:#ffc93c;
+    --pohutukawa:#e6484f;
+    --tide:#2ea9a0;
+    --dusk:#5b4b93;
+    --sand:#fbf4e4;
+    --sand-dim:#f0e6cf;
+    --ink:#12261e;
+    --paper:#fffdf7;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    min-height:100vh;
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    position:relative;
+    overflow-x:hidden;
+    background:var(--bush-deep);
+  }
+
+  h1,h2,h3,.brand{
+    font-family:'Fredoka',sans-serif;
+  }
+
+  /* ---------- ANIMATED SKY ---------- */
+  .sky{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    background:linear-gradient(180deg,
+      var(--dusk) 0%,
+      #3f6f8f 28%,
+      var(--tide) 58%,
+      #e08a3e 82%,
+      var(--kowhai) 100%);
+    background-size:100% 220%;
+    animation:driftSky 40s ease-in-out infinite alternate;
+  }
+  @keyframes driftSky{
+    0%{background-position:0 0%;}
+    100%{background-position:0 100%;}
+  }
+
+  .glow-horizon{
+    position:fixed;
+    left:0; right:0; bottom:0;
+    height:40vh;
+    background:radial-gradient(ellipse at 50% 100%, rgba(255,201,60,.45), transparent 70%);
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .clouds{position:fixed; inset:0; z-index:1; pointer-events:none;}
+  .cloud{
+    position:absolute;
+    background:rgba(255,255,255,.18);
+    border-radius:50%;
+    filter:blur(1px);
+    animation:floatCloud linear infinite;
+  }
+  @keyframes floatCloud{
+    from{transform:translateX(-20vw);}
+    to{transform:translateX(120vw);}
+  }
+
+  /* ---------- BIRDS ---------- */
+  .birds{position:fixed; inset:0; z-index:2; pointer-events:none;}
+  .bird{
+    position:absolute;
+    width:34px; height:16px;
+    opacity:.55;
+    animation-name:flyAcross, bob;
+    animation-timing-function:linear, ease-in-out;
+    animation-iteration-count:infinite, infinite;
+  }
+  .bird svg{width:100%;height:100%;fill:var(--bush-deep);}
+  @keyframes flyAcross{
+    from{transform:translateX(-10vw);}
+    to{transform:translateX(110vw);}
+  }
+  @keyframes bob{
+    0%,100%{margin-top:0;}
+    50%{margin-top:14px;}
+  }
+
+  /* ---------- FERNS ---------- */
+  .ferns{
+    position:fixed; left:0; right:0; bottom:-6px;
+    height:22vh; z-index:3; pointer-events:none;
+    display:flex; align-items:flex-end; justify-content:space-around;
+  }
+  .fern{
+    transform-origin:bottom center;
+    animation:sway 6s ease-in-out infinite;
+    opacity:.85;
+  }
+  .fern svg{display:block; filter:drop-shadow(0 6px 6px rgba(0,0,0,.25));}
+  @keyframes sway{
+    0%,100%{transform:rotate(-4deg);}
+    50%{transform:rotate(4deg);}
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{
+    position:relative;
+    z-index:5;
+    max-width:1100px;
+    margin:0 auto;
+    padding:56px 24px 80px;
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:46px;
+  }
+  .brand{
+    font-size:clamp(2.6rem, 6vw, 4.4rem);
+    color:var(--paper);
+    margin:0;
+    letter-spacing:.5px;
+    text-shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  .brand span{color:var(--kowhai);}
+  .tagline{
+    color:var(--sand);
+    font-weight:600;
+    font-size:1.15rem;
+    margin-top:10px;
+    text-shadow:0 2px 10px rgba(0,0,0,.3);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:22px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(18,38,30,.035) 0, transparent 40%),
+      radial-gradient(circle at 82% 78%, rgba(18,38,30,.035) 0, transparent 40%);
+    border-radius:20px 20px 26px 20px;
+    padding:28px 22px 24px;
+    text-align:left;
+    text-decoration:none;
+    color:var(--ink);
+    box-shadow:0 10px 30px rgba(10,25,20,.35);
+    border:2px solid rgba(18,38,30,.08);
+    transform:translateY(0);
+    transition:transform .28s cubic-bezier(.2,.9,.3,1.3), box-shadow .28s ease, border-color .3s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    gap:6px;
+    min-height:150px;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .card-fill{
+    position:absolute;
+    left:-4%; right:-4%; top:0;
+    height:9px;
+    background:var(--accent, var(--tide));
+    transition:height .45s cubic-bezier(.65,0,.35,1);
+    z-index:0;
+    border-radius:0 0 60% 60% / 0 0 100% 100%;
+  }
+  .card:hover .card-fill, .card:focus-visible .card-fill{
+    height:112%;
+    border-radius:0;
+  }
+  .card:hover, .card:focus-visible{
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(10,25,20,.45);
+    border-color:var(--accent, var(--tide));
+    outline:none;
+  }
+  .card h2{
+    position:relative;
+    z-index:1;
+    margin:0;
+    font-size:1.22rem;
+    color:var(--ink);
+    transition:color .3s ease;
+  }
+  .card p{
+    position:relative;
+    z-index:1;
+    margin:0;
+    font-size:.8rem;
+    color:#6b6152;
+    font-weight:600;
+    word-break:break-word;
+    transition:color .3s ease;
+  }
+  .card:hover h2, .card:focus-visible h2{ color:var(--hover-ink, #fffdf7); }
+  .card:hover p, .card:focus-visible p{ color:var(--hover-ink, #fffdf7); opacity:.85; }
+
+  .card-arrow{
+    position:absolute;
+    top:18px; right:20px;
+    z-index:1;
+    font-size:1rem;
+    color:var(--hover-ink, #fffdf7);
+    opacity:0;
+    transform:translate(-4px,4px);
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .card:hover .card-arrow, .card:focus-visible .card-arrow{
+    opacity:.9;
+    transform:translate(0,0);
+  }
+
+  /* ---------- Watch this space card ---------- */
+  .watch-card{
+    border:2px dashed rgba(251,244,228,.4);
+    background:rgba(251,244,228,.06);
+    box-shadow:none;
+    align-items:flex-start;
+    justify-content:center;
+    cursor:default;
+  }
+  .watch-card:hover{
+    transform:none;
+    box-shadow:none;
+    border-color:rgba(255,201,60,.55);
+  }
+  .watch-card h2, .watch-card p{
+    color:var(--sand);
+    position:relative;
+    z-index:1;
+  }
+  .watch-card p{color:rgba(251,244,228,.65);}
+  .watch-seed{
+    width:10px; height:10px;
+    border-radius:50%;
+    background:var(--kowhai);
+    margin-bottom:10px;
+    box-shadow:0 0 0 0 rgba(255,201,60,.6);
+    animation:pulseSeed 2.6s ease-out infinite;
+  }
+  @keyframes pulseSeed{
+    0%{box-shadow:0 0 0 0 rgba(255,201,60,.55);}
+    70%{box-shadow:0 0 0 12px rgba(255,201,60,0);}
+    100%{box-shadow:0 0 0 0 rgba(255,201,60,0);}
+  }
+
+  footer{
+    text-align:center;
+    margin-top:60px;
+    color:var(--sand);
+    font-size:.85rem;
+    opacity:.7;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .sky, .bird, .cloud, .fern, .card, .watch-seed{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="sky"></div>
+  <div class="glow-horizon"></div>
+  <div class="clouds" id="clouds"></div>
+  <svg class="birds" id="birds" width="0" height="0" style="position:absolute">
+    <defs>
+      <symbol id="bird-shape" viewBox="0 0 34 16">
+        <path d="M0,12 C6,2 11,2 17,10 C23,2 28,2 34,12 C27,9 22,9 17,13 C12,9 7,9 0,12 Z"/>
+      </symbol>
+    </defs>
+  </svg>
+  <div class="ferns" id="ferns"></div>
+
+  <div class="wrap">
+    <header>
+      <h1 class="brand">Aura<span>bot</span></h1>
+      <p class="tagline">Pick a path, start the lesson.</p>
+    </header>
+
+    <main class="grid" id="appGrid"></main>
+
+    <footer>Your menu</footer>
+  </div>
+
+<script>
+  // ---------- Background decoration: clouds, birds, ferns ----------
+  const cloudLayer = document.getElementById('clouds');
+  for(let i=0;i<6;i++){
+    const c = document.createElement('div');
+    c.className='cloud';
+    const size = 60 + Math.random()*120;
+    c.style.width = size+'px';
+    c.style.height = size*0.5+'px';
+    c.style.top = (5 + Math.random()*40)+'vh';
+    c.style.animationDuration = (50 + Math.random()*40)+'s';
+    c.style.animationDelay = (-Math.random()*60)+'s';
+    cloudLayer.appendChild(c);
+  }
+
+  const birdLayer = document.getElementById('birds');
+  for(let i=0;i<7;i++){
+    const b = document.createElement('div');
+    b.className='bird';
+    const size = 22 + Math.random()*24;
+    b.style.width = size+'px';
+    b.style.height = (size*0.47)+'px';
+    b.style.top = (8 + Math.random()*45)+'vh';
+    b.style.animationDuration = (18 + Math.random()*22)+'s, ' + (2+Math.random()*2)+'s';
+    b.style.animationDelay = (-Math.random()*30)+'s, ' + (-Math.random()*3)+'s';
+    b.innerHTML = '<svg viewBox="0 0 34 16"><use href="#bird-shape"/></svg>';
+    birdLayer.appendChild(b);
+  }
+
+  const fernLayer = document.getElementById('ferns');
+  const fernColors = ['#0f2a21','#16342b','#1a4636'];
+  for(let i=0;i<9;i++){
+    const f = document.createElement('div');
+    f.className='fern';
+    const h = 60 + Math.random()*90;
+    const col = fernColors[i % fernColors.length];
+    f.style.animationDuration = (5 + Math.random()*3)+'s';
+    f.style.animationDelay = (-Math.random()*5)+'s';
+    f.innerHTML = `<svg width="${h*0.5}" height="${h}" viewBox="0 0 40 100">
+      <path d="M20,100 C18,60 22,40 20,0 C30,25 34,45 26,60 C34,55 38,70 28,78 C34,80 34,92 24,92 C30,95 24,100 20,100 Z" fill="${col}"/>
+    </svg>`;
+    fernLayer.appendChild(f);
+  }
+
+  // ---------- App menu ----------
+  // To add a new app: copy a line below and edit the name, url, and accent
+  // color, then re-upload this file to GitHub. Accent colors used elsewhere
+  // on the page: #2ea9a0 teal, #e6484f red, #5b4b93 purple, #e08a3e orange,
+  // #ffc93c yellow — pick any of these, or your own hex color.
+  const APPS = [
+    {name:'Reading',      url:'https://aurabotsubjects.github.io/reading/',     accent:'#2ea9a0'},
+    {name:'Writing',      url:'https://aurabotsubjects.github.io/writing/',     accent:'#e6484f'},
+    {name:'Wayfinder',    url:'https://aurabotsubjects.github.io/wayfinder/',   accent:'#5b4b93'},
+    {name:'Writing 3–4',  url:'https://aurabotsubjects.github.io/writing3_4/',  accent:'#e08a3e'},
+    {name:'Te Reo',       url:'https://aurabotsubjects.github.io/te-reo/',      accent:'#ffc93c'},
+    {name:'Māori Art',    url:'https://aurabotsubjects.github.io/maori-art/',   accent:'#e6484f'},
+    {name:'Art Elements', url:'https://aurabotsubjects.github.io/art-elements/',accent:'#2ea9a0'},
+  ];
+
+  const grid = document.getElementById('appGrid');
+
+  function contrastInk(hex){
+    if(!hex) return '#fffdf7';
+    const h = hex.replace('#','');
+    const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+    const luminance = (0.299*r + 0.587*g + 0.114*b) / 255;
+    return luminance > 0.62 ? '#12261e' : '#fffdf7';
+  }
+
+  function makeCard(app){
+    const a = document.createElement('a');
+    a.className = 'card';
+    a.href = app.url;
+    const accent = app.accent || '#2ea9a0';
+    a.style.setProperty('--accent', accent);
+    a.style.setProperty('--hover-ink', contrastInk(accent));
+    a.innerHTML = `
+      <div class="card-fill"></div>
+      <span class="card-arrow">↗</span>
+      <h2>${escapeHtml(app.name)}</h2>
+      <p>${escapeHtml(app.url.replace(/^https?:\/\//,''))}</p>
+    `;
+    return a;
+  }
+
+  function makeWatchCard(){
+    const div = document.createElement('div');
+    div.className = 'card watch-card';
+    div.innerHTML = `
+      <span class="watch-seed"></span>
+      <h2 style="font-size:1.1rem;">Watch this space</h2>
+      <p>More lessons are on the way</p>
+    `;
+    return div;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  APPS.forEach(app => grid.appendChild(makeCard(app)));
+  grid.appendChild(makeWatchCard());
+</script>
+</body>
+</html>
