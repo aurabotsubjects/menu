@@ -452,6 +452,64 @@
     opacity:.7;
   }
 
+
+  /* ---------- HIDDEN ADMIN ---------- */
+  .clock{cursor:pointer; user-select:none; -webkit-user-select:none;}
+  .clock:hover{background:rgba(255,253,247,.26);}
+  .admin-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(5,12,9,.74);
+    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    display:none; align-items:flex-start; justify-content:center;
+    padding:40px 16px; overflow-y:auto;
+  }
+  .admin-overlay.open{display:flex;}
+  .admin-panel{
+    background:var(--paper); color:var(--ink);
+    border-radius:20px; width:100%; max-width:820px;
+    padding:24px 26px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,.55);
+    font-family:'Manrope',sans-serif;
+  }
+  .admin-panel h2{margin:0 0 4px; font-size:1.5rem;}
+  .admin-sub{margin:0 0 18px; font-size:.85rem; color:#6b6152;}
+  .admin-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .admin-panel input[type=text], .admin-panel input[type=password], .admin-panel select{
+    font-family:'Manrope',sans-serif; font-size:.9rem; font-weight:600;
+    padding:9px 11px; border-radius:9px;
+    border:1px solid #d9d0ba; background:#fffdf7; color:var(--ink);
+    min-width:0;
+  }
+  .admin-panel input[type=color]{
+    width:42px; height:38px; padding:2px; border:1px solid #d9d0ba;
+    border-radius:9px; background:#fffdf7; cursor:pointer;
+  }
+  .grow{flex:1 1 140px;}
+  .btn{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.85rem;
+    padding:10px 16px; border-radius:10px; border:none; cursor:pointer;
+    background:var(--bush); color:#fffdf7; transition:filter .2s ease, transform .15s ease;
+  }
+  .btn:hover{filter:brightness(1.15); transform:translateY(-1px);}
+  .btn.ghost{background:transparent; color:var(--bush); border:1px solid #cfc5ad;}
+  .btn.danger{background:var(--pohutukawa);}
+  .btn.small{padding:6px 10px; font-size:.78rem;}
+  .admin-item{
+    border:1px solid #e2d9c2; border-radius:14px;
+    padding:14px; margin-bottom:12px; background:#fdfaf1;
+  }
+  .admin-item > .admin-row + .admin-row{margin-top:8px;}
+  .sub-list{margin-top:10px; padding-left:12px; border-left:3px solid #e2d9c2;}
+  .sub-row{display:flex; gap:6px; margin-bottom:6px; align-items:center;}
+  .sub-row input{flex:1 1 auto;}
+  .admin-section{margin-top:26px; padding-top:18px; border-top:1px solid #e6dcc5;}
+  .admin-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:22px;}
+  .admin-note{font-size:.78rem; color:#6b6152; margin:10px 0 0; line-height:1.5;}
+  .admin-msg{font-size:.85rem; font-weight:700; margin-top:10px; min-height:1.1em;}
+  .admin-msg.ok{color:#2e6b52;}
+  .admin-msg.err{color:#c04a2b;}
+  .login-box{max-width:360px;}
+
   @media (prefers-reduced-motion: reduce){
     .sky, .sky-night, .stars, .star, .crux-star, .glow-horizon, .bird, .cloud, .fern, .card, .submenu{animation:none !important; transition:none !important;}
     .sky-night{opacity:0 !important;}
@@ -500,6 +558,47 @@
 
     <main class="grid" id="appGrid"></main>
 
+  </div>
+
+  <div class="admin-overlay" id="adminOverlay" role="dialog" aria-modal="true" aria-label="Admin">
+    <div class="admin-panel login-box" id="adminLogin">
+      <h2>Admin</h2>
+      <p class="admin-sub">Enter the admin password.</p>
+      <div class="admin-row">
+        <input type="password" id="adminPw" class="grow" placeholder="Password" autocomplete="off">
+      </div>
+      <div class="admin-actions">
+        <button class="btn" id="adminLoginBtn">Unlock</button>
+        <button class="btn ghost" id="adminCancelBtn">Cancel</button>
+      </div>
+      <p class="admin-msg err" id="adminLoginMsg"></p>
+    </div>
+
+    <div class="admin-panel" id="adminEditor" style="display:none;">
+      <h2>Menu admin</h2>
+      <p class="admin-sub">Add, remove, rename and re-order subjects and their sub-topics.</p>
+      <div id="adminItems"></div>
+      <button class="btn ghost" id="addSubjectBtn">+ Add subject</button>
+
+      <div class="admin-section">
+        <h2 style="font-size:1.1rem;">Change password</h2>
+        <div class="admin-row" style="margin-top:8px;">
+          <input type="password" id="newPw" class="grow" placeholder="New password" autocomplete="new-password">
+          <input type="password" id="newPw2" class="grow" placeholder="Confirm new password" autocomplete="new-password">
+          <button class="btn small" id="changePwBtn">Update</button>
+        </div>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn" id="adminSaveBtn">Save changes</button>
+        <button class="btn ghost" id="adminCloseBtn">Close</button>
+        <button class="btn ghost" id="adminExportBtn">Download updated index.html</button>
+        <button class="btn ghost" id="adminCopyBtn">Copy menu code</button>
+        <button class="btn danger" id="adminResetBtn">Reset to built-in menu</button>
+      </div>
+      <p class="admin-msg" id="adminMsg"></p>
+      <p class="admin-note">Saved changes are stored in this browser only. To publish them for everyone, click <strong>Download updated index.html</strong> and upload that file to your GitHub repo (replacing the existing index.html). The downloaded file also carries the current password.</p>
+    </div>
   </div>
 
 <script>
@@ -565,7 +664,8 @@
   // To add a group with a popup (like Writing/Art/Topic): {type:'group', name:'...', accent:'...', options:[{name:'...', url:'...'}, ...]}
   // Accent colors used elsewhere on the page: #2ea9a0 teal, #d9603f ember,
   // #5b4b93 purple, #e08a3e orange, #ffc93c yellow, #2e6b52 bush green.
-  const MENU = [
+  /*MENU_START*/
+  const DEFAULT_MENU = [
     {type:'link', name:'Reading', url:'https://aurabotsubjects.github.io/reading/', accent:'#2ea9a0'},
     {type:'group', name:'Homework', accent:'#e08a3e', options:[
       {name:'Spelling', url:'https://aurabotsubjects.github.io/Spelling/'},
@@ -595,6 +695,27 @@
     ]},
     {type:'link', name:'Devotions', url:'https://aurabotsubjects.github.io/devotions/', accent:'#d9603f'},
   ];
+  /*MENU_END*/
+
+  /*PW_START*/
+  const DEFAULT_PW_HASH = '630d7ee44e8b80717b9e3a94f03ea7c374d96c0dcd5c1fadf45aeb32cae0e657';
+  /*PW_END*/
+
+  const MENU_KEY = 'aurabot_menu_v1';
+  const PW_KEY   = 'aurabot_admin_pw_v1';
+
+  function loadMenu(){
+    try{
+      const raw = localStorage.getItem(MENU_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    }catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULT_MENU));
+  }
+
+  let MENU = loadMenu();
 
   const grid = document.getElementById('appGrid');
 
@@ -691,9 +812,13 @@
     if(!e.target.closest('.card-wrap')) closeAllSubmenus(null);
   });
 
-  MENU.forEach(item => {
-    grid.appendChild(item.type === 'group' ? makeGroupCard(item) : makeCard(item));
-  });
+  function renderMenu(){
+    grid.innerHTML = '';
+    MENU.forEach(item => {
+      grid.appendChild(item.type === 'group' ? makeGroupCard(item) : makeCard(item));
+    });
+    grid.appendChild(makeVerseCard());
+  }
 
   // ---------- Verse of the week ----------
   // A local bank of verses that rotates every Monday morning — one shows per
@@ -744,7 +869,7 @@
     return div;
   }
 
-  grid.appendChild(makeVerseCard());
+  renderMenu();
 
   // ---------- Clock ----------
   function updateClock(){
@@ -757,6 +882,229 @@
   }
   updateClock();
   setInterval(updateClock, 1000);
+
+  // ---------- Hidden admin ----------
+  (function(){
+    const overlay   = document.getElementById('adminOverlay');
+    const loginBox  = document.getElementById('adminLogin');
+    const editorBox = document.getElementById('adminEditor');
+    const pwInput   = document.getElementById('adminPw');
+    const loginMsg  = document.getElementById('adminLoginMsg');
+    const itemsBox  = document.getElementById('adminItems');
+    const msg       = document.getElementById('adminMsg');
+    let work = [];
+
+    function currentPwHash(){
+      try{ return localStorage.getItem(PW_KEY) || DEFAULT_PW_HASH; }
+      catch(e){ return DEFAULT_PW_HASH; }
+    }
+
+    async function sha256(text){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function say(el, text, ok){
+      el.textContent = text;
+      el.className = 'admin-msg ' + (ok ? 'ok' : 'err');
+      if(text) setTimeout(() => { if(el.textContent === text) el.textContent = ''; }, 4000);
+    }
+
+    function openAdmin(){
+      overlay.classList.add('open');
+      loginBox.style.display = '';
+      editorBox.style.display = 'none';
+      pwInput.value = '';
+      loginMsg.textContent = '';
+      setTimeout(() => pwInput.focus(), 50);
+    }
+    function closeAdmin(){
+      overlay.classList.remove('open');
+    }
+
+    document.getElementById('clock').addEventListener('click', openAdmin);
+    document.getElementById('adminCancelBtn').addEventListener('click', closeAdmin);
+    document.getElementById('adminCloseBtn').addEventListener('click', closeAdmin);
+    overlay.addEventListener('click', e => { if(e.target === overlay) closeAdmin(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeAdmin(); });
+
+    async function tryLogin(){
+      const hash = await sha256(pwInput.value);
+      if(hash === currentPwHash()){
+        work = JSON.parse(JSON.stringify(MENU));
+        loginBox.style.display = 'none';
+        editorBox.style.display = '';
+        buildEditor();
+      } else {
+        say(loginMsg, 'Incorrect password.', false);
+        pwInput.select();
+      }
+    }
+    document.getElementById('adminLoginBtn').addEventListener('click', tryLogin);
+    pwInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+    function el(tag, cls, props){
+      const n = document.createElement(tag);
+      if(cls) n.className = cls;
+      Object.assign(n, props || {});
+      return n;
+    }
+
+    function buildEditor(){
+      itemsBox.innerHTML = '';
+      work.forEach((item, i) => itemsBox.appendChild(itemBlock(item, i)));
+    }
+
+    function itemBlock(item, index){
+      const box = el('div','admin-item');
+
+      const row = el('div','admin-row');
+      const name = el('input','grow',{type:'text', value:item.name || '', placeholder:'Subject name'});
+      name.oninput = () => { item.name = name.value; };
+
+      const colour = el('input',null,{type:'color', value:item.accent || '#2ea9a0', title:'Accent colour'});
+      colour.oninput = () => { item.accent = colour.value; };
+
+      const type = el('select');
+      [['link','Single link'],['group','Group with sub-topics']].forEach(([v,label]) => {
+        const o = el('option',null,{value:v, textContent:label});
+        o.selected = (item.type === v);
+        type.appendChild(o);
+      });
+      type.onchange = () => {
+        item.type = type.value;
+        if(item.type === 'group' && !Array.isArray(item.options)) item.options = [];
+        if(item.type === 'link' && typeof item.url !== 'string') item.url = '';
+        buildEditor();
+      };
+
+      const up = el('button','btn ghost small',{type:'button', textContent:'↑', title:'Move up'});
+      up.onclick = () => { if(index>0){ work.splice(index-1,0,work.splice(index,1)[0]); buildEditor(); } };
+      const down = el('button','btn ghost small',{type:'button', textContent:'↓', title:'Move down'});
+      down.onclick = () => { if(index<work.length-1){ work.splice(index+1,0,work.splice(index,1)[0]); buildEditor(); } };
+      const del = el('button','btn danger small',{type:'button', textContent:'Remove'});
+      del.onclick = () => { if(confirm('Remove "'+(item.name||'this subject')+'"?')){ work.splice(index,1); buildEditor(); } };
+
+      row.append(name, colour, type, up, down, del);
+      box.appendChild(row);
+
+      if(item.type === 'group'){
+        const list = el('div','sub-list');
+        (item.options || []).forEach((opt, j) => {
+          const sr = el('div','sub-row');
+          const sn = el('input',null,{type:'text', value:opt.name || '', placeholder:'Sub-topic name'});
+          sn.oninput = () => { opt.name = sn.value; };
+          const su = el('input',null,{type:'text', value:opt.url || '', placeholder:'https://...'});
+          su.oninput = () => { opt.url = su.value; };
+          const sd = el('button','btn danger small',{type:'button', textContent:'✕'});
+          sd.onclick = () => { item.options.splice(j,1); buildEditor(); };
+          sr.append(sn, su, sd);
+          list.appendChild(sr);
+        });
+        const add = el('button','btn ghost small',{type:'button', textContent:'+ Add sub-topic'});
+        add.onclick = () => { item.options.push({name:'New sub-topic', url:'https://'}); buildEditor(); };
+        list.appendChild(add);
+        box.appendChild(list);
+      } else {
+        const r2 = el('div','admin-row');
+        const url = el('input','grow',{type:'text', value:item.url || '', placeholder:'https://...'});
+        url.oninput = () => { item.url = url.value; };
+        r2.appendChild(url);
+        box.appendChild(r2);
+      }
+      return box;
+    }
+
+    document.getElementById('addSubjectBtn').onclick = () => {
+      work.push({type:'link', name:'New subject', url:'https://', accent:'#2ea9a0'});
+      buildEditor();
+    };
+
+    function cleaned(){
+      return work.map(it => {
+        const base = {type: it.type === 'group' ? 'group' : 'link', name:(it.name||'').trim(), accent: it.accent || '#2ea9a0'};
+        if(base.type === 'group'){
+          base.options = (it.options||[])
+            .filter(o => (o.name||'').trim())
+            .map(o => ({name:(o.name||'').trim(), url:(o.url||'').trim()}));
+        } else {
+          base.url = (it.url||'').trim();
+        }
+        return base;
+      }).filter(it => it.name);
+    }
+
+    document.getElementById('adminSaveBtn').onclick = () => {
+      const data = cleaned();
+      try{ localStorage.setItem(MENU_KEY, JSON.stringify(data)); }
+      catch(e){ say(msg, 'Could not save to this browser.', false); return; }
+      MENU = JSON.parse(JSON.stringify(data));
+      work = JSON.parse(JSON.stringify(data));
+      renderMenu();
+      buildEditor();
+      say(msg, 'Saved. The menu behind this panel is updated.', true);
+    };
+
+    document.getElementById('adminResetBtn').onclick = () => {
+      if(!confirm('Discard your changes and go back to the built-in menu?')) return;
+      try{ localStorage.removeItem(MENU_KEY); }catch(e){}
+      MENU = JSON.parse(JSON.stringify(DEFAULT_MENU));
+      work = JSON.parse(JSON.stringify(DEFAULT_MENU));
+      renderMenu();
+      buildEditor();
+      say(msg, 'Reset to the built-in menu.', true);
+    };
+
+    document.getElementById('changePwBtn').onclick = async () => {
+      const a = document.getElementById('newPw').value;
+      const b = document.getElementById('newPw2').value;
+      if(a.length < 4){ say(msg, 'Password must be at least 4 characters.', false); return; }
+      if(a !== b){ say(msg, 'The two passwords do not match.', false); return; }
+      try{ localStorage.setItem(PW_KEY, await sha256(a)); }
+      catch(e){ say(msg, 'Could not save the password in this browser.', false); return; }
+      document.getElementById('newPw').value = '';
+      document.getElementById('newPw2').value = '';
+      say(msg, 'Password updated for this browser. Download the file to publish it.', true);
+    };
+
+    function menuCode(){
+      return '/*MENU_START*/\n  const DEFAULT_MENU = ' + JSON.stringify(cleaned(), null, 2).replace(/\n/g,'\n  ') + ';\n  /*MENU_END*/';
+    }
+
+    document.getElementById('adminCopyBtn').onclick = async () => {
+      try{
+        await navigator.clipboard.writeText(menuCode());
+        say(msg, 'Menu code copied to the clipboard.', true);
+      }catch(e){
+        say(msg, 'Clipboard blocked — use the download button instead.', false);
+      }
+    };
+
+    document.getElementById('adminExportBtn').onclick = async () => {
+      try{
+        const res = await fetch(location.href, {cache:'no-store'});
+        let txt = await res.text();
+        const s1 = txt.indexOf('/*MENU_START*/'), e1 = txt.indexOf('/*MENU_END*/');
+        if(s1 < 0 || e1 < 0) throw new Error('markers');
+        txt = txt.slice(0, s1) + menuCode() + txt.slice(e1 + '/*MENU_END*/'.length);
+
+        const s2 = txt.indexOf('/*PW_START*/'), e2 = txt.indexOf('/*PW_END*/');
+        if(s2 > -1 && e2 > -1){
+          const pwBlock = "/*PW_START*/\n  const DEFAULT_PW_HASH = '" + currentPwHash() + "';\n  /*PW_END*/";
+          txt = txt.slice(0, s2) + pwBlock + txt.slice(e2 + '/*PW_END*/'.length);
+        }
+
+        const url = URL.createObjectURL(new Blob([txt], {type:'text/html'}));
+        const a = document.createElement('a');
+        a.href = url; a.download = 'index.html';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+        say(msg, 'Downloaded. Upload it to GitHub to publish the changes.', true);
+      }catch(e){
+        say(msg, 'Could not build the file here — use "Copy menu code" instead.', false);
+      }
+    };
+  })();
 </script>
 </body>
 </html>
